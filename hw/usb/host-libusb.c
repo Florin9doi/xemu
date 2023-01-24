@@ -456,6 +456,21 @@ static void LIBUSB_CALL usb_host_req_complete_ctrl(struct libusb_transfer *xfer)
                 trace_usb_host_remote_wakeup_removed(s->bus_num, s->addr);
                 conf->bmAttributes &= ~USB_CFG_ATT_WAKEUP;
         }
+
+        if (udev->setup_buf[0] == USB_DIR_IN &&
+            udev->setup_buf[1] == USB_REQ_GET_DESCRIPTOR &&
+            udev->setup_buf[3] == USB_DT_DEVICE && udev->setup_buf[2] == 0 &&
+            xfer->actual_length > offsetof(struct libusb_device_descriptor, idProduct)) {
+                ((struct libusb_device_descriptor*)r->cbuf)->idVendor = 0x045e;
+                ((struct libusb_device_descriptor*)r->cbuf)->idProduct = 0x028c;
+            fprintf(stderr, "fake ids : %02x %02x %02x %02x\n",
+                r->cbuf[8],
+                r->cbuf[9],
+                r->cbuf[0x0a],
+                r->cbuf[0x0b]
+            );
+
+        }
     }
     trace_usb_host_req_complete(s->bus_num, s->addr, r->p,
                                 r->p->status, r->p->actual_length);
