@@ -13,6 +13,8 @@ specific_ss.add(files(
 	'smbus_storage.c',
 	'smbus_xbox_smc.c',
 	'xbox.c',
+	'xbox_camera.c',
+	'xbox_camera_jo_jpeg.c',
 	'xbox_pci.c',
 	'xid.c',
 	'xblc.c',
