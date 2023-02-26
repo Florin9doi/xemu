@@ -35,6 +35,34 @@ enum {
 };
 
 static const USBDescIface desc_iface[] = {
+    /*
+    {
+        .bInterfaceNumber   = 0,
+        .bAlternateSetting  = 0,
+        .bNumEndpoints      = 1,
+        .bInterfaceClass    = 0x58, // USB_CLASS_XID,
+        .bInterfaceSubClass = 0x42, // USB_DT_XID
+        .bInterfaceProtocol = 0,
+        .iInterface         = STR_EMPTY,
+        .eps = (USBDescEndpoint[]) {
+            {
+                .bEndpointAddress = USB_DIR_IN | 0x01,
+                .bmAttributes     = USB_ENDPOINT_XFER_INT,
+                .wMaxPacketSize   = 8,
+                .bInterval        = 16,
+            },
+        },
+    },
+    {
+        .bInterfaceNumber   = 1,
+        .bAlternateSetting  = 0,
+        .bNumEndpoints      = 0,
+        .bInterfaceClass    = 0x59,
+        .bInterfaceSubClass = 0,
+        .bInterfaceProtocol = 0,
+        .iInterface         = STR_EMPTY,
+    },
+    /*/
     {
         .bInterfaceNumber   = 0,
         .bAlternateSetting  = 0,
@@ -44,6 +72,7 @@ static const USBDescIface desc_iface[] = {
         .bInterfaceProtocol = 0,
         .iInterface         = STR_EMPTY,
     },
+    //*/
 };
 
 static const USBDescDevice desc_device = {
@@ -55,6 +84,7 @@ static const USBDescDevice desc_device = {
     .bNumConfigurations = 1,
     .confs = (USBDescConfig[]) {
         {
+            //.bNumInterfaces      = 2,
             .bNumInterfaces      = 1,
             .bConfigurationValue = 1,
             .iConfiguration      = STR_EMPTY,
@@ -104,6 +134,15 @@ static void xbox_dvd_playback_kit_handle_control(USBDevice *dev, USBPacket *p,
 
     ret = usb_desc_handle_control(dev, p, request, value, index, length, data);
     if (ret >= 0) {
+        /*
+        fprintf(stderr, "xbox_dvd_playback_kit_handle_control : "
+            "req=0x%x val=0x%x idx=0x%x len=0x%x ret=%d / data=",
+            request, value, index, length, ret);
+        for (int i = 0; i < length; i++) {
+            fprintf(stderr, "%02x ", data[i]);
+        }
+        fprintf(stderr, "\n");
+        //*/
         return;
     }
 
@@ -120,6 +159,46 @@ static void xbox_dvd_playback_kit_handle_control(USBDevice *dev, USBPacket *p,
             }
         }
         break;
+    case 0xc106: // GET_DESCRIPTOR
+        data[0] = 0x08; // len
+        data[1] = 0x42; // type
+        data[2] = 0x00; // xid
+        data[3] = 0x01; // xid
+        data[4] = 0x03; // type
+        data[5] = 0x00; // subtype
+        data[6] = 0x06; // in size
+        data[7] = 0x00; // out size
+        p->actual_length = 8;
+        break;
+    case 0xa101: // GET_REPORT
+        p->status = USB_RET_STALL;
+        p->actual_length = 0;
+        break;
+    }
+
+    /*
+    fprintf(stderr, "xbox_dvd_playback_kit_handle_control : "
+        "req=0x%02x val=0x%02x idx=0x%02x len=0x%02x / data=",
+        request, value, index, length);
+    for (int i = 0; i < length && i < p->actual_length && i < 32; i++) {
+        fprintf(stderr, "%02x ", data[i]);
+    }
+    fprintf(stderr, "\n");
+    //*/
+}
+
+static void xbox_dvd_playback_kit_handle_data(USBDevice *dev, USBPacket *p) {
+    switch(p->pid) {
+        case USB_TOKEN_OUT:
+            fprintf(stderr, "xbox_dvd_playback_kit_handle_data OUT : ep=%d\n", p->ep->nr);
+            break;
+        case USB_TOKEN_IN:
+            fprintf(stderr, "xbox_dvd_playback_kit_handle_data IN : ep=%d, sz=%llu\n", p->ep->nr, p->iov.size);
+            {
+            uint8_t data[] = {0x00, 0x06, 0x00, 0x00, 0xff, 0xff};
+            usb_packet_copy(p, data, sizeof(data));
+            }
+            break;
     }
 }
 
@@ -131,6 +210,7 @@ static void xbox_dvd_playback_kit_class_init(ObjectClass *klass, void *class_dat
     uc->usb_desc       = &desc_xbox_dvd_playback_kit;
     uc->realize        = xbox_dvd_playback_kit_realize;
     uc->handle_control = xbox_dvd_playback_kit_handle_control;
+    uc->handle_data    = xbox_dvd_playback_kit_handle_data;
 
     dc->desc = "Microsoft Xbox DVD Playback Kit";
 }
