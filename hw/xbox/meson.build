@@ -15,6 +15,7 @@ specific_ss.add(files(
 	'xbox.c',
 	'xbox_camera.c',
 	'xbox_camera_jo_jpeg.c',
+	'xbox_dvd_playback_kit.c',
 	'xbox_pci.c',
 	'xid.c',
 	'xblc.c',
