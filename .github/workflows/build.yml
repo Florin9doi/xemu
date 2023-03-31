@@ -270,6 +270,9 @@ jobs:
         echo -e "\nCompiler Cache Stats:"
         ccache -s
         pushd dist
+        export VERSION=$(cat ../XEMU_VERSION)
+        plutil -replace CFBundleShortVersionString -string $VERSION xemu.app/Contents/Info.plist
+        plutil -replace CFBundleVersion            -string $VERSION xemu.app/Contents/Info.plist
         zip -r ../${{ matrix.artifact_filename }} *
         popd
     - name: Upload build artifact
