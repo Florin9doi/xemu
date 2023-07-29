@@ -35,7 +35,7 @@ enum {
 };
 
 static const USBDescIface desc_iface[] = {
-    /*
+    //*
     {
         .bInterfaceNumber   = 0,
         .bAlternateSetting  = 0,
@@ -84,8 +84,8 @@ static const USBDescDevice desc_device = {
     .bNumConfigurations = 1,
     .confs = (USBDescConfig[]) {
         {
-            //.bNumInterfaces      = 2,
-            .bNumInterfaces      = 1,
+            .bNumInterfaces      = 2,
+            //.bNumInterfaces      = 1,
             .bConfigurationValue = 1,
             .iConfiguration      = STR_EMPTY,
             .bmAttributes        = 0x00,
@@ -134,7 +134,7 @@ static void xbox_dvd_playback_kit_handle_control(USBDevice *dev, USBPacket *p,
 
     ret = usb_desc_handle_control(dev, p, request, value, index, length, data);
     if (ret >= 0) {
-        /*
+        //*
         fprintf(stderr, "xbox_dvd_playback_kit_handle_control : "
             "req=0x%x val=0x%x idx=0x%x len=0x%x ret=%d / data=",
             request, value, index, length, ret);
@@ -172,11 +172,17 @@ static void xbox_dvd_playback_kit_handle_control(USBDevice *dev, USBPacket *p,
         break;
     case 0xa101: // GET_REPORT
         p->status = USB_RET_STALL;
+        data[0] = 0xff;
+        data[1] = 0xff;
+        data[2] = 0xff;
+        data[3] = 0xff;
+        data[4] = 0xff;
+        data[5] = 0xff;
         p->actual_length = 0;
         break;
     }
 
-    /*
+    //*
     fprintf(stderr, "xbox_dvd_playback_kit_handle_control : "
         "req=0x%02x val=0x%02x idx=0x%02x len=0x%02x / data=",
         request, value, index, length);
@@ -193,9 +199,9 @@ static void xbox_dvd_playback_kit_handle_data(USBDevice *dev, USBPacket *p) {
             fprintf(stderr, "xbox_dvd_playback_kit_handle_data OUT : ep=%d\n", p->ep->nr);
             break;
         case USB_TOKEN_IN:
-            fprintf(stderr, "xbox_dvd_playback_kit_handle_data IN : ep=%d, sz=%llu\n", p->ep->nr, p->iov.size);
+            fprintf(stderr, "xbox_dvd_playback_kit_handle_data IN : ep=%d, sz=%lu\n", p->ep->nr, p->iov.size);
             {
-            uint8_t data[] = {0x00, 0x06, 0x00, 0x00, 0xff, 0xff};
+            uint8_t data[] = {0x00, 0x06, 0xa7, 0x0A, 0x40, 0x00};
             usb_packet_copy(p, data, sizeof(data));
             }
             break;
