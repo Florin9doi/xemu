@@ -228,11 +228,11 @@ static const char *display_frag_glsl =
     "        vec4 output_region = vec4(pvideo_pos.xy, pvideo_pos.xy + pvideo_pos.zw);\n"
     "        bvec4 clip = bvec4(lessThan(screen_coord, output_region.xy),\n"
     "                           greaterThan(screen_coord, output_region.zw));\n"
-    "        if (!any(clip) && (!pvideo_color_key_enable || out_Color.rgba == pvideo_color_key)) {\n"
+   // "        if (!any(clip) && (!pvideo_color_key_enable || out_Color.rgba == pvideo_color_key)) {\n"
     "            vec2 out_xy = screen_coord - pvideo_pos.xy;\n"
     "            vec2 in_st = (pvideo_in_pos + out_xy * pvideo_scale.xy) / textureSize(pvideo_tex, 0);\n"
     "            out_Color.rgba = texture(pvideo_tex, in_st);\n"
-    "        }\n"
+   // "        }\n"
     "    }\n"
     "}\n";
 
