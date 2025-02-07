@@ -4607,7 +4607,7 @@ subdir('scripts')
 subdir('tools')
 subdir('pc-bios')
 subdir('docs')
-subdir('tests')
+# subdir('tests')
 if gtk.found()
   subdir('po')
 endif

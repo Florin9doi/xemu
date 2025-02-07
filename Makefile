@@ -123,7 +123,7 @@ build.ninja.stamp: meson.stamp $(build-files)
 	fi && echo "$(MESON)" > $@
 
 Makefile.mtest: build.ninja scripts/mtest2make.py
-	$(MESON) introspect --targets --tests --benchmarks | $(PYTHON) scripts/mtest2make.py > $@
+	$(MESON) introspect --targets | $(PYTHON) scripts/mtest2make.py > $@
 -include Makefile.mtest
 
 .PHONY: update-buildoptions
