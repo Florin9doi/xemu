@@ -163,7 +163,7 @@ xemu_version = custom_target('xemu-version-macro.h',
                              command: xemu_version_cmd,
                              capture: true,
                              build_by_default: true,
-                             build_always_stale: true)
+                             build_always_stale: false)
 
 #####################
 # Option validation #
@@ -3645,7 +3645,7 @@ qemu_version = custom_target('qemu-version.h',
                              command: qemu_version_cmd,
                              capture: true,
                              build_by_default: true,
-                             build_always_stale: true)
+                             build_always_stale: false)
 
 xemu_config = custom_target('xemu-config.h',
                             output: 'xemu-config.h',
