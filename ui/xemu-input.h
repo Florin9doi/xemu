@@ -32,11 +32,13 @@
 
 #define DRIVER_DUKE "usb-xbox-gamepad"
 #define DRIVER_S "usb-xbox-gamepad-s"
+#define DRIVER_GAMETRAK "usb-xbox-gametrak"
 #define DRIVER_STEEL_BATTALION "usb-steel-battalion"
 #define DRIVER_DVD_PLAYBACK_KIT "xbox-dvd-playback-kit"
 
 #define DRIVER_DUKE_DISPLAY_NAME "Xbox Controller"
 #define DRIVER_S_DISPLAY_NAME "Xbox Controller S"
+#define DRIVER_GAMETRAK_DISPLAY_NAME "Xbox Gametrak"
 #define DRIVER_STEEL_BATTALION_DISPLAY_NAME "Steel Battalion Controller"
 #define DRIVER_DVD_PLAYBACK_KIT_DISPLAY_NAME "Xbox DVD Playback Kit"
 

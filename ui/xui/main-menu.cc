@@ -172,6 +172,8 @@ void MainMenuInputView::Draw()
         driver = DRIVER_DUKE_DISPLAY_NAME;
     else if (strcmp(driver, DRIVER_S) == 0)
         driver = DRIVER_S_DISPLAY_NAME;
+    else if (strcmp(driver, DRIVER_GAMETRAK) == 0)
+        driver = DRIVER_GAMETRAK_DISPLAY_NAME;
     else if (strcmp(driver, DRIVER_STEEL_BATTALION) == 0)
         driver = DRIVER_STEEL_BATTALION_DISPLAY_NAME;
     else if (strcmp(driver, DRIVER_DVD_PLAYBACK_KIT) == 0)
@@ -183,12 +185,14 @@ void MainMenuInputView::Draw()
         const char *available_drivers[] = {
             DRIVER_DUKE,
             DRIVER_S,
+            DRIVER_GAMETRAK,
             DRIVER_STEEL_BATTALION,
             DRIVER_DVD_PLAYBACK_KIT
             };
         const char *driver_display_names[] = {
             DRIVER_DUKE_DISPLAY_NAME,
             DRIVER_S_DISPLAY_NAME,
+            DRIVER_GAMETRAK_DISPLAY_NAME,
             DRIVER_STEEL_BATTALION_DISPLAY_NAME,
             DRIVER_DVD_PLAYBACK_KIT_DISPLAY_NAME
             };
@@ -335,7 +339,8 @@ void MainMenuInputView::Draw()
     ImGui::SetCursorPos(pos);
 
     if (bound_state) {
-        bool hasInternalHub = strcmp(bound_drivers[active], DRIVER_STEEL_BATTALION) != 0
+        bool hasInternalHub = strcmp(bound_drivers[active], DRIVER_GAMETRAK) != 0
+                           && strcmp(bound_drivers[active], DRIVER_STEEL_BATTALION) != 0
                            && strcmp(bound_drivers[active], DRIVER_DVD_PLAYBACK_KIT) != 0;
         bool hasFirmware = strcmp(bound_drivers[active], DRIVER_DVD_PLAYBACK_KIT) == 0;
         if (hasInternalHub) {

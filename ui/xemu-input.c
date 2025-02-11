@@ -1024,7 +1024,8 @@ void xemu_input_bind(int index, ControllerState *state, int save)
         QDict *usbhub_qdict = NULL;
         DeviceState *usbhub_dev = NULL;
 
-        bool hasInternalHub = strcmp(bound_drivers[index], DRIVER_STEEL_BATTALION) != 0
+        bool hasInternalHub = strcmp(bound_drivers[index], DRIVER_GAMETRAK) != 0
+                           && strcmp(bound_drivers[index], DRIVER_STEEL_BATTALION) != 0
                            && strcmp(bound_drivers[index], DRIVER_DVD_PLAYBACK_KIT) != 0;
         bool hasFirmware = strcmp(bound_drivers[index], DRIVER_DVD_PLAYBACK_KIT) == 0;
 
@@ -1088,7 +1089,8 @@ bool xemu_input_bind_xmu(int player_index, int expansion_slot_index,
     assert(player_index >= 0 && player_index < 4);
     assert(expansion_slot_index >= 0 && expansion_slot_index < 2);
 
-    bool hasInternalHub = strcmp(bound_drivers[player_index], DRIVER_STEEL_BATTALION) != 0
+    bool hasInternalHub = strcmp(bound_drivers[player_index], DRIVER_GAMETRAK) != 0
+                       && strcmp(bound_drivers[player_index], DRIVER_STEEL_BATTALION) != 0
                        && strcmp(bound_drivers[player_index], DRIVER_DVD_PLAYBACK_KIT) != 0;
     assert(hasInternalHub);
 
@@ -1214,7 +1216,8 @@ void xemu_input_unbind_xmu(int player_index, int expansion_slot_index)
 
 void xemu_input_rebind_xmu(int port)
 {
-    bool hasInternalHub = strcmp(bound_drivers[port], DRIVER_STEEL_BATTALION) != 0
+    bool hasInternalHub = strcmp(bound_drivers[port], DRIVER_GAMETRAK) != 0
+                       && strcmp(bound_drivers[port], DRIVER_STEEL_BATTALION) != 0
                        && strcmp(bound_drivers[port], DRIVER_DVD_PLAYBACK_KIT) != 0;
     if (!hasInternalHub)
         return;

@@ -57,6 +57,7 @@
 
 #define TYPE_USB_XID_GAMEPAD "usb-xbox-gamepad"
 #define TYPE_USB_XID_GAMEPAD_S "usb-xbox-gamepad-s"
+#define TYPE_USB_XID_GAMETRAK "usb-xbox-gametrak"
 #define TYPE_USB_XID_STEEL_BATTALION "usb-steel-battalion"
 #define TYPE_USB_XBOX_DVD_PLAYBACK_KIT "xbox-dvd-playback-kit"
 
