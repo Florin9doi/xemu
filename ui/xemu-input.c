@@ -156,6 +156,8 @@ static const char *get_bound_driver(int port)
         return DRIVER_DUKE;
     if (strcmp(driver, DRIVER_S) == 0)
         return DRIVER_S;
+    if (strcmp(driver, DRIVER_GAMETRAK) == 0)
+        return DRIVER_GAMETRAK;
     if (strcmp(driver, DRIVER_STEEL_BATTALION) == 0)
         return DRIVER_STEEL_BATTALION;
     if (strcmp(driver, DRIVER_DVD_PLAYBACK_KIT) == 0)

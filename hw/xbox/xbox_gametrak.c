@@ -17,128 +17,92 @@
 
 #include "xid.h"
 
-typedef struct XboxGametrakReport {
-    uint8_t bReportId;
-    uint8_t bLength;
-    uint16_t wButton;
-    uint16_t wTimer;
-} QEMU_PACKED XboxGametrakReport;
-
-typedef struct XboxGametrakState {
-    USBDevice dev;
-    uint8_t device_index;
-    XboxGametrakReport in_state;
-} XboxGametrakState;
-
-enum {
-    STR_EMPTY
-};
-
-static const USBDescIface desc_iface[] = {
-    {
-        .bInterfaceNumber   = 0,
-        .bAlternateSetting  = 0,
-        .bNumEndpoints      = 1,
-        .bInterfaceClass    = 0x58, // USB_CLASS_XID,
-        .bInterfaceSubClass = 0x42, // USB_DT_XID
-        .bInterfaceProtocol = 0,
-        .iInterface         = STR_EMPTY,
-        .eps = (USBDescEndpoint[]) {
+static const USBDescIface desc_iface_xbox_gametrak = {
+    .bInterfaceNumber   = 0x00,
+    .bNumEndpoints      = 0x02,
+    .bInterfaceClass    = USB_CLASS_XID,
+    .bInterfaceSubClass = USB_DT_XID,
+    .bInterfaceProtocol = 0x00,
+    .eps =
+        (USBDescEndpoint[]){
             {
-                .bEndpointAddress = USB_DIR_IN | 0x01,
+                .bEndpointAddress = USB_DIR_IN | 0x02,
                 .bmAttributes     = USB_ENDPOINT_XFER_INT,
-                .wMaxPacketSize   = 8,
-                .bInterval        = 16,
+                .wMaxPacketSize   = 0x20,
+                .bInterval        = 4,
+            },
+            {
+                .bEndpointAddress = USB_DIR_OUT | 0x02,
+                .bmAttributes     = USB_ENDPOINT_XFER_INT,
+                .wMaxPacketSize   = 0x20,
+                .bInterval        = 4,
             },
         },
-    },
-    {
-        .bInterfaceNumber   = 1,
-        .bAlternateSetting  = 0,
-        .bNumEndpoints      = 0,
-        .bInterfaceClass    = 0x59,
-        .bInterfaceSubClass = 0,
-        .bInterfaceProtocol = 0,
-        .iInterface         = STR_EMPTY,
-    },
 };
 
-static const USBDescDevice desc_device = {
-    .bcdUSB             = 0x0110,
-    .bDeviceClass       = 0,
-    .bDeviceSubClass    = 0,
-    .bDeviceProtocol    = 0,
-    .bMaxPacketSize0    = 64,
+static const USBDescDevice desc_device_xbox_gametrak = {
+    .bcdUSB = 0x0110,
+    .bMaxPacketSize0 = 0x40,
     .bNumConfigurations = 1,
-    .confs = (USBDescConfig[]) {
-        {
-            .bNumInterfaces      = 2,
-            .bConfigurationValue = 1,
-            .iConfiguration      = STR_EMPTY,
-            .bmAttributes        = 0x00,
-            .bMaxPower           = 0x00,
-            .nif = ARRAY_SIZE(desc_iface),
-            .ifs = desc_iface,
+    .confs =
+        (USBDescConfig[]){
+            {
+                .bNumInterfaces      = 1,
+                .bConfigurationValue = 1,
+                .bmAttributes        = USB_CFG_ATT_ONE,
+                .bMaxPower           = 50,
+                .nif                 = 1,
+                .ifs                 = &desc_iface_xbox_gametrak,
+            },
         },
-    },
 };
 
 static const USBDesc desc_xbox_gametrak = {
     .id = {
         .idVendor      = 0x045e,
-        .idProduct     = 0x0284,
+        .idProduct     = 0x0202,
         .bcdDevice     = 0x0100,
-        .iManufacturer = STR_EMPTY,
-        .iProduct      = STR_EMPTY,
-        .iSerialNumber = STR_EMPTY,
+        .iManufacturer = STR_MANUFACTURER,
+        .iProduct      = STR_PRODUCT,
+        .iSerialNumber = STR_SERIALNUMBER,
     },
-    .full = &desc_device,
+    .full = &desc_device_xbox_gametrak,
+    .str  = desc_strings,
 };
 
 static const XIDDesc desc_xid_xbox_gametrak = {
-    .bLength              = 0x08,
+    .bLength              = 0x10,
     .bDescriptorType      = USB_DT_XID,
     .bcdXid               = 0x0100,
-    .bType                = XID_DEVICETYPE_DVD_PLAYBACK_KIT,
-    .bSubType             = XID_DEVICESUBTYPE_DVD_PLAYBACK_KIT,
-    .bMaxInputReportSize  = 0x06,
-    .bMaxOutputReportSize = 0x00,
+    .bType                = XID_DEVICETYPE_GAMEPAD,
+    .bSubType             = XID_DEVICESUBTYPE_GAMEPAD,
+    .bMaxInputReportSize  = 20,
+    .bMaxOutputReportSize = 6,
+    .wAlternateProductIds = { 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF },
 };
 
 static void xbox_gametrak_realize(USBDevice *dev, Error **errp) {
-    XboxGametrakState *s = (XboxGametrakState *) dev;
+    USBXIDGamepadState *s = (USBXIDGamepadState *) dev;
 
     usb_desc_init(dev);
+    s->in_state.bLength = sizeof(s->in_state);
+    s->in_state.bReportId = 0;
+
+    s->out_state.length = sizeof(s->out_state);
+    s->out_state.report_id = 0;
+
+    s->xid_desc = &desc_xid_xbox_gametrak;
+
+    memset(&s->in_state_capabilities, 0xFF, sizeof(s->in_state_capabilities));
+    s->in_state_capabilities.bLength = sizeof(s->in_state_capabilities);
+    s->in_state_capabilities.bReportId = 0;
+
+    memset(&s->out_state_capabilities, 0xFF, sizeof(s->out_state_capabilities));
+    s->out_state_capabilities.length = sizeof(s->out_state_capabilities);
+    s->out_state_capabilities.report_id = 0;
 }
 
-static void xbox_gametrak_handle_control(USBDevice *dev, USBPacket *p,
-        int request, int value, int index, int length, uint8_t *data) {
-    XboxGametrakState *s = (XboxGametrakState *) dev;
-
-    int ret = usb_desc_handle_control(dev, p, request, value, index, length, data);
-    if (ret >= 0) {
-        return;
-    }
-
-    switch (request) {
-    case 0xc101:
-    case 0xc102:
-    {
-        break;
-    }
-    case 0xc106: // GET_DESCRIPTOR
-        memcpy(data, &desc_xid_xbox_gametrak, desc_xid_xbox_gametrak.bLength);
-        p->actual_length = desc_xid_xbox_gametrak.bLength;
-        break;
-    case 0xa101: // GET_REPORT
-    default:
-        p->actual_length = 0;
-        p->status = USB_RET_STALL;
-        break;
-    }
-}
-
-static void update_dvd_kit_input(XboxGametrakState *s)
+static void update_gametrak_input(USBXIDGamepadState *s)
 {
     if (xemu_input_get_test_mode()) {
         // Don't report changes if we are testing the controller while running
@@ -149,26 +113,28 @@ static void update_dvd_kit_input(XboxGametrakState *s)
     assert(state);
     xemu_input_update_controller(state);
 
-    s->in_state.bReportId = 0x00;
-    s->in_state.bLength = 0x06;
-    s->in_state.wButton = 0x0000;
-    if (state->dvdKit.buttons) {
-        // for (int i = 0; i < sizeof(dvd_button_ids) / sizeof(dvd_button_ids[0]); i++) {
-        //     if ((1ULL << i) & state->dvdKit.buttons) {
-        //         s->in_state.wButton = dvd_button_ids[i].id;
-        //         return;
-        //     }
-        // }
-    }
+    s->in_state.bLength = 0x14;
+    s->in_state.wButtons = 0x0000;
+    s->in_state.bAnalogButtons[2] = 0xff;
+    s->in_state.bAnalogButtons[3] = 0xff;
+    s->in_state.bAnalogButtons[4] = 0x0f;
+    memset((char*)&s->in_state+2, 0xFF, 0x12);
 }
 
 static void xbox_gametrak_handle_data(USBDevice *dev, USBPacket *p) {
-    XboxGametrakState *s = DO_UPCAST(XboxGametrakState, dev, dev);
+    USBXIDGamepadState *s = DO_UPCAST(USBXIDGamepadState, dev, dev);
 
     switch (p->pid) {
         case USB_TOKEN_IN:
-            update_dvd_kit_input(s);
+            update_gametrak_input(s);
             usb_packet_copy(p, &s->in_state, s->in_state.bLength);
+            //*
+            fprintf(stderr, "xbox_gametrak_handle_data : len=0x%02x / data=", p->actual_length);
+            for (int i = 0; i < p->actual_length && i < 32; i++) {
+                fprintf(stderr, "%02x ", *((uint8_t*)&s->in_state + i));
+            }
+            fprintf(stderr, "\n");
+            //*/
             break;
         case USB_TOKEN_OUT:
         default:
@@ -177,7 +143,7 @@ static void xbox_gametrak_handle_data(USBDevice *dev, USBPacket *p) {
 }
 
 static Property xid_properties[] = {
-    DEFINE_PROP_UINT8("index", XboxGametrakState, device_index, 0),
+    DEFINE_PROP_UINT8("index", USBXIDGamepadState, device_index, 0),
     DEFINE_PROP_END_OF_LIST(),
 };
 
@@ -188,7 +154,7 @@ static void xbox_gametrak_class_init(ObjectClass *klass, void *class_data) {
     uc->product_desc   = "Xbox Gametrak";
     uc->usb_desc       = &desc_xbox_gametrak;
     uc->realize        = xbox_gametrak_realize;
-    uc->handle_control = xbox_gametrak_handle_control;
+    uc->handle_control = usb_xid_handle_control;
     uc->handle_data    = xbox_gametrak_handle_data;
 
     device_class_set_props(dc, xid_properties);
@@ -198,7 +164,7 @@ static void xbox_gametrak_class_init(ObjectClass *klass, void *class_data) {
 static const TypeInfo xbox_gametrak_info = {
     .name          = TYPE_USB_XID_GAMETRAK,
     .parent        = TYPE_USB_DEVICE,
-    .instance_size = sizeof(XboxGametrakState),
+    .instance_size = sizeof(USBXIDGamepadState),
     .class_init    = xbox_gametrak_class_init,
 };
 
