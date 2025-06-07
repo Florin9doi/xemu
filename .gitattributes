@@ -7,3 +7,8 @@
 Cargo.lock      diff=toml merge=binary
 
 *.patch         -text -whitespace
+
+*.sh            text eol=lf
+*.py            text eol=lf
+configure       text eol=lf
+scripts/hxtool  text eol=lf
